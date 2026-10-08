@@ -18,6 +18,8 @@ Lab 1 also uses Strategy (`RoundRobin`, `LeastConnections`, `RandomChoice`), Ada
 
 The detailed design notes, class diagram, benchmark example, and SOLID violation/fix are in [`docs/lab1.md`](docs/lab1.md).
 
+For the class relationships, request flow, pattern roles, and arrow meanings, see [`docs/architecture.md`](docs/architecture.md).
+
 ## Roadmap
 
 Only Phase 1 is implemented in this repository snapshot. Later phases are planned and will be added in separate changes:
