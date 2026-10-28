@@ -1,35 +1,71 @@
-"""Config-driven construction (Lab 1).
+"""Config-driven construction with a singleton component registry.
 
-Pattern: FACTORY (with registries). This is the ONLY module that knows
-concrete classes; everything else depends on abstractions (DIP). New types are
-added with `register_*` and no existing code changes (OCP).
+The gateway core depends on abstractions. Vendor factories provide built-in
+backend constructors; new types can be added with ``register_*``.
 """
 from __future__ import annotations
 
+import threading
 from typing import Any, Callable, Mapping
 
-from .backends import VendorAAdapter, VendorBAdapter
 from .core import Backend, BalancingStrategy
 from .gateway import Gateway
 from .strategies import LeastConnections, RandomChoice, RoundRobin
+from .vendor_factories import VendorAFactory, VendorBFactory
 
-_BACKENDS: dict[str, Callable[..., Backend]] = {
-    "vendor_a": VendorAAdapter,
-    "vendor_b": VendorBAdapter,
-}
-_STRATEGIES: dict[str, Callable[..., BalancingStrategy]] = {
-    "round_robin": RoundRobin,
-    "least_connections": LeastConnections,
-    "random": RandomChoice,
-}
+
+class FactoryRegistry:
+    """Process-wide singleton registry of component constructors."""
+
+    _instance: FactoryRegistry | None = None
+    _instance_lock = threading.Lock()
+
+    def __new__(cls) -> FactoryRegistry:
+        with cls._instance_lock:
+            if cls._instance is None:
+                instance = super().__new__(cls)
+                instance._lock = threading.RLock()
+                instance._backends = {
+                    "vendor_a": VendorAFactory().create_backend,
+                    "vendor_b": VendorBFactory().create_backend,
+                }
+                instance._strategies = {
+                    "round_robin": RoundRobin,
+                    "least_connections": LeastConnections,
+                    "random": RandomChoice,
+                }
+                cls._instance = instance
+            return cls._instance
+
+    def register_backend(self, kind: str, ctor: Callable[..., Backend]) -> None:
+        with self._lock:
+            self._backends[kind] = ctor
+
+    def register_strategy(self, kind: str, ctor: Callable[..., BalancingStrategy]) -> None:
+        with self._lock:
+            self._strategies[kind] = ctor
+
+    def backend(self, kind: str) -> Callable[..., Backend]:
+        with self._lock:
+            try:
+                return self._backends[kind]
+            except KeyError:
+                raise ValueError(f"unknown backend type: {kind!r}") from None
+
+    def strategy(self, kind: str) -> Callable[..., BalancingStrategy]:
+        with self._lock:
+            try:
+                return self._strategies[kind]
+            except KeyError:
+                raise ValueError(f"unknown strategy: {kind!r}") from None
 
 
 def register_backend(kind: str, ctor: Callable[..., Backend]) -> None:
-    _BACKENDS[kind] = ctor
+    FactoryRegistry().register_backend(kind, ctor)
 
 
 def register_strategy(kind: str, ctor: Callable[..., BalancingStrategy]) -> None:
-    _STRATEGIES[kind] = ctor
+    FactoryRegistry().register_strategy(kind, ctor)
 
 
 def build_gateway(config: Mapping[str, Any]) -> Gateway:
@@ -38,16 +74,11 @@ def build_gateway(config: Mapping[str, Any]) -> Gateway:
     if isinstance(strategy_cfg, str):
         strategy_cfg = {"type": strategy_cfg}
     strategy_args = {k: v for k, v in strategy_cfg.items() if k != "type"}
-    try:
-        strategy = _STRATEGIES[strategy_cfg["type"]](**strategy_args)
-    except KeyError:
-        raise ValueError(f"unknown strategy: {strategy_cfg['type']!r}") from None
+    registry = FactoryRegistry()
+    strategy = registry.strategy(strategy_cfg["type"])(**strategy_args)
 
     backends: list[Backend] = []
     for entry in config["backends"]:
         args = {k: v for k, v in entry.items() if k != "type"}
-        try:
-            backends.append(_BACKENDS[entry["type"]](**args))
-        except KeyError:
-            raise ValueError(f"unknown backend type: {entry['type']!r}") from None
+        backends.append(registry.backend(entry["type"])(**args))
     return Gateway(backends, strategy)

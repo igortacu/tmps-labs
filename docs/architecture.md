@@ -1,6 +1,6 @@
 # Architecture and design patterns
 
-This document describes the Phase 1 gateway. The simulated vendor clients stand in for real vendor SDKs; they do not make network requests or generate real LLM responses.
+This document describes the Phase 1 gateway. The later creational additions are described in [`creational.md`](creational.md). The simulated vendor clients stand in for real vendor SDKs; they do not make network requests or generate real LLM responses.
 
 ## Class and relationship diagram
 
@@ -196,6 +196,8 @@ In the sequence diagram, `->>` is a call or outgoing message and `-->>` is a ret
 | Adapter | `VendorAAdapter`, `VendorBAdapter` | Translates the shared `Backend` request and response contract to and from each vendor API. |
 | Strategy | `RoundRobin`, `RandomChoice`, `LeastConnections` | Implements a backend selection rule. The factory configures which strategy the gateway uses; that strategy selects a backend for each request. |
 | Facade | `Gateway` | Gives callers one `handle(request)` entry point and coordinates backend selection, load tracking, and failover. |
-| Registry-based factory | `build_gateway`, `_BACKENDS`, `_STRATEGIES` | Looks up configured names and constructs the matching adapters and strategy. This is registry-based construction, not the classic GoF Factory Method with subclass-overridden creation methods. |
+| Registry-based factory | `build_gateway`, `FactoryRegistry` | Looks up configured names and constructs the matching adapters and strategy. This is registry-based construction, not the classic GoF Factory Method with subclass-overridden creation methods. |
 
 `Request` and `Response` are the common data types. `Backend` and `BalancingStrategy` are abstract contracts. `BackendError` is the normalized backend failure; `NoBackendAvailable` reports that all configured backends failed for the request. `VendorAClient` and `VendorBClient` simulate incompatible third-party SDK interfaces.
+
+The built-in registry entries now call `VendorAFactory` and `VendorBFactory`, which each build matching client and adapter families. `GatewayBuilder` and `GatewayConfigPrototype` prepare configuration before `build_gateway`; an optional `ObjectPool` supplies vendor clients to an adapter.

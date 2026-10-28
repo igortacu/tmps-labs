@@ -1,6 +1,6 @@
 # AI Inference Gateway
 
-A small Python gateway that distributes inference requests across simulated LLM backends. Lab 1 focuses on three SOLID principles: Single Responsibility, Open/Closed, and Dependency Inversion. Backend latency and failures are simulated; benchmark results compare balancing strategies rather than real LLM services.
+A small Python gateway that distributes inference requests across simulated LLM backends. Lab 1 focuses on three SOLID principles: Single Responsibility, Open/Closed, and Dependency Inversion. The next step adds five creational patterns. Backend latency and failures are simulated; benchmark results compare balancing strategies rather than real LLM services.
 
 ## Lab 1: Core gateway
 
@@ -18,16 +18,17 @@ Lab 1 also uses Strategy (`RoundRobin`, `LeastConnections`, `RandomChoice`), Ada
 
 The detailed design notes, class diagram, benchmark example, and SOLID violation/fix are in [`docs/lab1.md`](docs/lab1.md).
 
-For the class relationships, request flow, pattern roles, and arrow meanings, see [`docs/architecture.md`](docs/architecture.md).
+For the class relationships, request flow, pattern roles, and arrow meanings, see [`docs/architecture.md`](docs/architecture.md). The new patterns and usage example are in [`docs/creational.md`](docs/creational.md).
 
 ## Roadmap
 
-Only Phase 1 is implemented in this repository snapshot. Later phases are planned and will be added in separate changes:
+The core gateway and creational patterns are implemented. Further phases are planned:
 
-1. **Core gateway and SOLID (current):** backend abstraction and adapters, balancing strategies, gateway orchestration, configuration factory, concurrency handling.
-2. **Resilience:** circuit breaker (State pattern), retries and timeouts (Decorator pattern).
-3. **Traffic controls:** rate limiting and caching (Chain of Responsibility).
-4. **Observability:** metrics and event notifications (Observer pattern).
+1. **Core gateway and SOLID:** backend abstraction and adapters, balancing strategies, gateway orchestration, configuration factory, concurrency handling.
+2. **Creational patterns (current):** singleton registry, fluent builder, configuration prototype, optional vendor client pool, and vendor abstract factories.
+3. **Resilience:** circuit breaker (State pattern), retries and timeouts (Decorator pattern).
+4. **Traffic controls:** rate limiting and caching (Chain of Responsibility).
+5. **Observability:** metrics and event notifications (Observer pattern).
 
 ## Run
 

@@ -8,8 +8,10 @@ from __future__ import annotations
 
 import random
 import time
+from contextlib import nullcontext
 
 from .core import Backend, BackendError, Request, Response
+from .pool import ObjectPool
 
 
 # --- "Third-party SDKs" we cannot change (adaptees) -------------------------
@@ -43,9 +45,14 @@ class VendorBClient:
 # --- Adapters ---------------------------------------------------------------
 class VendorAAdapter(Backend):
     def __init__(self, name: str = "vendor-a", latency_s: float = 0.02,
-                 failure_rate: float = 0.0, seed: int | None = None):
+                 failure_rate: float = 0.0, seed: int | None = None,
+                 client: VendorAClient | None = None,
+                 client_pool: ObjectPool[VendorAClient] | None = None):
+        if client is not None and client_pool is not None:
+            raise ValueError("provide a client or client_pool, not both")
         self._name = name
-        self._client = VendorAClient(latency_s, failure_rate, random.Random(seed))
+        self._client = client or (None if client_pool else VendorAClient(latency_s, failure_rate, random.Random(seed)))
+        self._client_pool = client_pool
 
     @property
     def name(self) -> str:
@@ -54,7 +61,8 @@ class VendorAAdapter(Backend):
     def handle(self, request: Request) -> Response:
         start = time.perf_counter()
         try:
-            raw = self._client.complete(request.prompt)
+            with self._client_pool.acquire() if self._client_pool else nullcontext(self._client) as client:
+                raw = client.complete(request.prompt)
         except Exception as exc:  # translate vendor errors to our contract
             raise BackendError(f"{self._name}: {exc}") from exc
         return Response(raw["text"], self._name, (time.perf_counter() - start) * 1000)
@@ -62,9 +70,14 @@ class VendorAAdapter(Backend):
 
 class VendorBAdapter(Backend):
     def __init__(self, name: str = "vendor-b", latency_s: float = 0.05,
-                 failure_rate: float = 0.0, seed: int | None = None):
+                 failure_rate: float = 0.0, seed: int | None = None,
+                 client: VendorBClient | None = None,
+                 client_pool: ObjectPool[VendorBClient] | None = None):
+        if client is not None and client_pool is not None:
+            raise ValueError("provide a client or client_pool, not both")
         self._name = name
-        self._client = VendorBClient(latency_s, failure_rate, random.Random(seed))
+        self._client = client or (None if client_pool else VendorBClient(latency_s, failure_rate, random.Random(seed)))
+        self._client_pool = client_pool
 
     @property
     def name(self) -> str:
@@ -73,8 +86,9 @@ class VendorBAdapter(Backend):
     def handle(self, request: Request) -> Response:
         start = time.perf_counter()
         try:
-            raw = self._client.generate([{"role": "user", "content": request.prompt}])
-            text = raw["choices"][0]["message"]["content"]
+            with self._client_pool.acquire() if self._client_pool else nullcontext(self._client) as client:
+                raw = client.generate([{"role": "user", "content": request.prompt}])
+                text = raw["choices"][0]["message"]["content"]
         except Exception as exc:
             raise BackendError(f"{self._name}: {exc}") from exc
         return Response(text, self._name, (time.perf_counter() - start) * 1000)
