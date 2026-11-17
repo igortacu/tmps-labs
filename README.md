@@ -18,7 +18,7 @@ Lab 1 also uses Strategy (`RoundRobin`, `LeastConnections`, `RandomChoice`), Ada
 
 The detailed design notes, class diagram, benchmark example, and SOLID violation/fix are in [`docs/lab1.md`](docs/lab1.md).
 
-For the class relationships, request flow, pattern roles, and arrow meanings, see [`docs/architecture.md`](docs/architecture.md). Lab 2 is documented in [`docs/lab2.md`](docs/lab2.md), with a shorter pattern reference in [`docs/creational.md`](docs/creational.md). Lab 3 has its own TypeScript [README](lab3/README.md) and [report](lab3/REPORT.md).
+For the class relationships, request flow, pattern roles, and arrow meanings, see [`docs/architecture.md`](docs/architecture.md). Lab 2 is documented in [`docs/lab2.md`](docs/lab2.md), with a shorter pattern reference in [`docs/creational.md`](docs/creational.md). Lab 3 has its own Java [README](lab3/README.md) and [report](lab3/REPORT.md).
 
 ## Roadmap
 
@@ -26,7 +26,7 @@ The core gateway, creational patterns, and structural-pattern lab are implemente
 
 1. **Core gateway and SOLID:** backend abstraction and adapters, balancing strategies, gateway orchestration, configuration factory, concurrency handling.
 2. **Creational patterns:** singleton registry, fluent builder, configuration prototype, optional vendor client pool, and vendor abstract factories.
-3. **Structural patterns (Lab 3):** TypeScript Composite, Decorator, and Proxy in an integrated inference path.
+3. **Structural patterns (Lab 3):** Java Composite, Decorator, and Proxy in an integrated inference path.
 4. **More resilience:** circuit breaker (State pattern) and request timeouts. Lab 3 already demonstrates retry with a Decorator.
 5. **Traffic controls:** rate limiting and caching (Chain of Responsibility).
 6. **Observability:** metrics and event notifications (Observer pattern).

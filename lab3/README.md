@@ -1,18 +1,17 @@
 # Lab 3: Structural patterns for the AI inference gateway
 
-The attached structural-pattern assignment requires a class-based language with explicit interfaces, so this lab is a TypeScript module beside the existing Python gateway. It carries forward the same simulated inference domain and uses a Builder to assemble the new pattern chain.
+The supplied assignment requires a class-based language with explicit interfaces. This lab is a Java 17 Maven module in the existing gateway repository. It keeps the simulated inference domain and uses a Builder to assemble the structural patterns.
 
 ## Run
 
-Requires Node.js 22 or newer and npm.
+Requires JDK 17 or newer and Maven 3.9 or newer.
 
 ```sh
 cd lab3
-npm ci
-npm test
-npm run demo
+mvn test
+mvn exec:java
 ```
 
-`npm test` compiles TypeScript and runs 11 unit/integration tests. `npm run demo` prints an authorized response, an audit event, and a blocked request. The runnable path is `AuthorizationProxy → AuditDecorator → RetryDecorator → BackendGroup → SimulatedBackend`.
+`mvn test` runs 11 JUnit tests. `mvn exec:java` prints an authorized response, an audit event, and a blocked request. The execution path is `AuthorizationProxy → AuditDecorator → RetryDecorator → BackendGroup → SimulatedBackend`.
 
-The full report, diagrams, code excerpts, and test evidence are in [REPORT.md](REPORT.md).
+The full report, diagrams, source excerpts, and test evidence are in [REPORT.md](REPORT.md).
