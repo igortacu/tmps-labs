@@ -22,14 +22,16 @@ For the class relationships, request flow, pattern roles, and arrow meanings, se
 
 ## Roadmap
 
-The core gateway, creational patterns, and structural-pattern lab are implemented. Further phases are planned:
+The core gateway, creational patterns, structural patterns, and five behavioral patterns are implemented. Further production-oriented phases are planned:
+
+The Java module in [`lab3/`](lab3/) also contains the behavioral patterns extension: Interpreter, Memento, Observer, Strategy, and Visitor, with an integrated demo, tests, and a [behavioral report](lab3/BEHAVIORAL_REPORT.md).
 
 1. **Core gateway and SOLID:** backend abstraction and adapters, balancing strategies, gateway orchestration, configuration factory, concurrency handling.
 2. **Creational patterns:** singleton registry, fluent builder, configuration prototype, optional vendor client pool, and vendor abstract factories.
-3. **Structural patterns (Lab 3):** Java Composite, Decorator, and Proxy in an integrated inference path.
-4. **More resilience:** circuit breaker (State pattern) and request timeouts. Lab 3 already demonstrates retry with a Decorator.
-5. **Traffic controls:** rate limiting and caching (Chain of Responsibility).
-6. **Observability:** metrics and event notifications (Observer pattern).
+3. **Structural patterns (Lab 3):** Java Adapter, Bridge, Decorator, and Facade in an integrated inference path; Composite and Proxy remain as supporting infrastructure.
+4. **More resilience:** production timeouts and circuit recovery.
+5. **Traffic controls:** production rate limiting and bounded caching.
+6. **Observability:** persistent metrics and event delivery. The behavioral lab demonstrates Observer notifications for routing changes.
 
 ## Run
 
